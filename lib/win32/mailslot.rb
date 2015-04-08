@@ -8,9 +8,24 @@ module Win32
     include Windows::Mailslot::Structs
     include Windows::Mailslot::Functions
 
+    # The name of the mailslot. Note that "//./mailslot/" is automatically prepended.
+    attr_reader :name
+
+    # The maximum size of a single message that can be written to the mailslot, in bytes. The default is 0 (any size).
+    attr_reader :max_size
+
+    # The time a read operation can wait for a message to be written to the mailslot before a time-out occurs, in milliseconds. 
+    attr_reader :max_time
+
+    # Determines whether the returned handle can be inherited by child processes. The default is true.
+    attr_reader :inherit
+
+    # The raw handle returned by the CreateMailSlot function
+    attr_reader :handle
+
     def initialize(name, max_size = 0, max_time = MAILSLOT_WAIT_FOREVER, inherit = true)
-      security = SECURITY_ATTRIBUTES.new
-      security[:bInheritHandle] = inherit
+      @security = SECURITY_ATTRIBUTES.new
+      @security[:bInheritHandle] = inherit
 
       @name = "\\\\.\\mailslot\\" << name
       @max_size = max_size
@@ -28,9 +43,12 @@ module Win32
       CloseHandle(@handle) if @handle
     end
 
-    def mainloop
-      while true
-      end
+    # Returns a MailslotInfo struct containing message size, next size, message
+    # count and timeout values for the given handle, or the handle created by
+    # the constructor if no argument is specified.
+    #
+    def get_info(handle = @handle)
+      
     end
   end
 end
