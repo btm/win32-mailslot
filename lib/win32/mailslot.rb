@@ -27,7 +27,19 @@ module Win32
     # The raw handle returned by the CreateMailSlot function
     attr_reader :handle
 
-    # Returns a new Mailslot object based on the parameters given.
+    # Returns a new Mailslot object.
+    #
+    # The +name+ argument is mandatory. It is automatically prepended
+    # with "//./mailslot/" so you shouldn't add that yourself.
+    #
+    # The +max_size+ defaults to 0, meaning the maximum size of a single
+    # message is unlimited by default.
+    #
+    # The +max_time+ argument sets the read timeout in milliseconds, which
+    # defaults to forever.
+    #
+    # The +inherit+ argument sets whether or not child processes can inherit
+    # the handle returned by Mailslot#create method. The default is true.
     #
     # Note that this does not actually create the mailslot. This only sets
     # parameters to be used later as needed. To create the mailslot call the
@@ -45,12 +57,18 @@ module Win32
       @handle   = nil
     end
 
+    # Creates a mailslot with the parameters given to the constructor.
+    #
+    # Returns the raw handle.
+    #
     def create
       @handle = CreateMailslot(@name, @max_size, @max_time, @security)
 
       if @handle == INVALID_HANDLE_VALUE
         raise SystemCallError.new('CreateMailSlot', FFI.errno)
       end
+
+      @handle
     end
 
     # Close a mailslot created with the Mailslot#create method.
