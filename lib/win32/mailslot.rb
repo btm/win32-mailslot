@@ -8,30 +8,44 @@ module Win32
     include Windows::Mailslot::Structs
     include Windows::Mailslot::Functions
 
-    # The name of the mailslot. Note that "//./mailslot/" is automatically prepended.
+    # The name of the mailslot. Note that "//./mailslot/" is
+    # automatically prepended.
     attr_reader :name
 
-    # The maximum size of a single message that can be written to the mailslot, in bytes. The default is 0 (any size).
+    # The maximum size of a single message that can be written to the mailslot,
+    # in bytes. The default is 0 (any size).
     attr_reader :max_size
 
-    # The time a read operation can wait for a message to be written to the mailslot before a time-out occurs, in milliseconds. 
+    # The time a read operation can wait for a message to be written to the
+    # mailslot before a time-out occurs, in milliseconds.
     attr_reader :max_time
 
-    # Determines whether the returned handle can be inherited by child processes. The default is true.
+    # Determines whether the returned handle can be inherited by child
+    # processes. The default is true.
     attr_reader :inherit
 
     # The raw handle returned by the CreateMailSlot function
     attr_reader :handle
 
+    # Returns a new Mailslot object based on the parameters given.
+    #
+    # Note that this does not actually create the mailslot. This only sets
+    # parameters to be used later as needed. To create the mailslot call the
+    # Mailslot#create method.
+    #
     def initialize(name, max_size = 0, max_time = MAILSLOT_WAIT_FOREVER, inherit = true)
       @security = SECURITY_ATTRIBUTES.new
       @security[:bInheritHandle] = inherit
 
       @name = "\\\\.\\mailslot\\" << name
+
       @max_size = max_size
       @max_time = max_time
       @inherit  = inherit
+      @handle   = nil
+    end
 
+    def create
       @handle = CreateMailslot(@name, @max_size, @max_time, @security)
 
       if @handle == INVALID_HANDLE_VALUE
@@ -39,16 +53,24 @@ module Win32
       end
     end
 
+    # Close a mailslot created with the Mailslot#create method.
     def close
       CloseHandle(@handle) if @handle
+    end
+
+    # Send a message to the mailslot named in the constructor.
+    def send(msg)
+    end
+
+    # Receive a mailslot message.
+    def recv
     end
 
     # Returns a MailslotInfo struct containing message size, next size, message
     # count and timeout values for the given handle, or the handle created by
     # the constructor if no argument is specified.
     #
-    def get_info(handle = @handle)
-      
+    def get_info
     end
   end
 end
